@@ -10,42 +10,55 @@ const client = new vision.ImageAnnotatorClient({
 
 global.email = '';
 global.number = 1;
-global.name = '';
-global.mobile = '';
-global.tel = '';
 
-client
-  .textDetection('app/img/3.jpg')
-  .then(results => {
-    const detections = results[0].textAnnotations;
-    console.log('==============================');
-    console.log('            Detect            ');
-    console.log('==============================');
-    console.log(detections[0].description);
-    console.log('==============================');
-    validateEmail(detections[0].description);
-    validateTel(detections[0].description);
-    validateName(detections[0].description);
-    if (global.email == '') {
-      console.log('Email : ');
-    }
-    if (global.mobile == '') {
-      console.log('Tel : ');
-    }
-    console.log('==============================');
-    })
+fs.watch(__dirname + '/img', { encoding: 'buffer' }, (eventType, filename) => {
+  console.log(filename +'...');
+  if (filename && global.number%2 == 1) {
+      global.name = '';
+      global.mobile = '';
+      global.tel = '';
+      client
+        .textDetection(__dirname + '/img/' + filename)
+        .then(results => {
+          const detections = results[0].textAnnotations;
+          console.log('==============================');
+          console.log('            Detect            ');
+          console.log('==============================');
+          console.log(detections[0].description);
+          console.log('==============================');
+          validateEmail(detections[0].description);
+          validateTel(detections[0].description);
+          validateName(detections[0].description);
+          if (global.email == '') {
+            console.log('Email : ');
+          }
+          if (global.mobile == '') {
+            console.log('Tel : ');
+          }
+          console.log('==============================');
+          global.textAll = detections[0].description;
+          })
+
+        .catch(err => {
+          // console.error('ERROR:', err);
+        });
+        global.number++;
+  }
+  else{
+    global.number++;
+  }
+})
 
 express()
   .use(express.static(path.join(__dirname, 'public')))
   .set('views', path.join(__dirname, 'views'))
   .set('view engine', 'ejs')
   .get('/', (req, res) => {
-    var drinks = [
-        { textAll: "detections[0].description", email: "global.email", tel: "global.tel", mobile: "global.mobile", name: "global.name" }
+    var detectText = [
+        { textAll: global.textAll, email: global.email, tel: global.tel, mobile: global.mobile, name: global.name }
     ];
-
     res.render('pages/index', {
-        drinks: drinks
+        detectText: detectText
     });
 
   })

@@ -7,13 +7,15 @@
 <body>
   <h2>Loop</h2>
 
-      <% drinks.textAll %>
-          <!-- <li><%= drink.textAll %></li>
-          <li><%= drink.email %></li>
-          <li><%= drink.tel %></li>
-          <li><%= drink.mobile %></li>
-          <li><%= drink.name %></li>
-      <% }); %> -->
+  <ul>
+      <% detectText.forEach(function(data) { %>
+        <li><%= data.textAll %></li>
+        <li><%= data.email %></li>
+        <li><%= data.tel %></li>
+        <li><%= data.mobile %></li>
+        <li><%= data.name %></li>
+      <% }); %>
+  </ul>
 
 
 </body>
