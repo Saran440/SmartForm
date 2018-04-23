@@ -41,7 +41,7 @@ express()
   .set('view engine', 'ejs')
   .get('/', (req, res) => {
     var drinks = [
-        { textAll: detections[0].description, email: global.email, tel: global.tel, mobile: global.mobile, name: global.name }
+        { textAll: "detections[0].description", email: "global.email", tel: "global.tel", mobile: "global.mobile", name: "global.name" }
     ];
 
     res.render('pages/index', {
