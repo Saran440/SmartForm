@@ -15,7 +15,7 @@ global.mobile = '';
 global.tel = '';
 
 client
-  .textDetection('/app/img/1.jpg')
+  .textDetection('/app/img/3.jpg')
   .then(results => {
     const detections = results[0].textAnnotations;
     console.log('==============================');
