@@ -15,7 +15,7 @@ global.mobile = '';
 global.tel = '';
 
 client
-  .textDetection('/Users/User/node-js-getting-started/img/1.jpg')
+  .textDetection('/app/img/1.jpg')
   .then(results => {
     const detections = results[0].textAnnotations;
     console.log('==============================');
@@ -39,7 +39,20 @@ express()
   .use(express.static(path.join(__dirname, 'public')))
   .set('views', path.join(__dirname, 'views'))
   .set('view engine', 'ejs')
-  .get('/', (req, res) => res.render('pages/index'))
+  .get('/', (req, res) => {
+    var drinks = [
+        { name: 'Bloody Mary', drunkness: 3 },
+        { name: 'Martini', drunkness: 5 },
+        { name: 'Scotch', drunkness: 10 }
+    ];
+    var tagline = "Any code of your own that you haven't looked at for six or more months might as well have been written by someone else.";
+
+    res.render('pages/index', {
+        drinks: drinks,
+        tagline: tagline
+    });
+
+  })
   .listen(PORT, () => console.log(`Listening on ${ PORT }`))
 
 
