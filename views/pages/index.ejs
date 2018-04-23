@@ -9,7 +9,11 @@
 
   <ul>
       <% drinks.forEach(function(drink) { %>
-          <li><%= drink.name %> - <%= drink.drunkness %></li>
+          <li><%= drink.textAll %></li>
+          <li><%= drink.email %></li>
+          <li><%= drink.tel %></li>
+          <li><%= drink.mobile %></li>
+          <li><%= drink.name %></li>
       <% }); %>
   </ul>
 
