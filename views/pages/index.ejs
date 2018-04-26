@@ -1,21 +1,40 @@
 <!DOCTYPE html>
 <html>
-<head>
-  Hello
-</head>
 
 <body>
   <h2>Loop</h2>
+  <form action="" method="post">
+    Text : <textarea rows="10" cols="70">
+    <% detectText.forEach(function(data) { %>
+      <%= data.textAll %>
+    <% }); %>
+    </textarea><br>
 
-  <ul>
-      <% detectText.forEach(function(data) { %>
-        <li><%= data.textAll %></li>
-        <li><%= data.email %></li>
-        <li><%= data.tel %></li>
-        <li><%= data.mobile %></li>
-        <li><%= data.name %></li>
-      <% }); %>
-  </ul>
+    Email : <textarea cols="35">
+    <% detectText.forEach(function(data) { %>
+      <%= data.email %>
+    <% }); %>
+    </textarea><br>
+
+    Tel : <textarea cols="35">
+    <% detectText.forEach(function(data) { %>
+      <%= data.tel %>
+    <% }); %>
+    </textarea><br>
+
+    Mobile : <textarea cols="35">
+    <% detectText.forEach(function(data) { %>
+      <%= data.mobile %>
+    <% }); %>
+    </textarea><br>
+
+    Name : <textarea cols="70">
+    <% detectText.forEach(function(data) { %>
+      <%= data.name %>
+    <% }); %>
+    </textarea>
+   </form>
+
 
 
 </body>
