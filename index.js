@@ -1,6 +1,7 @@
 const express = require('express')
 const path = require('path')
 const PORT = process.env.PORT || 5000
+const config = require('./config/config')
 const fs = require("fs");
 const vision = require('@google-cloud/vision');
 // Creates a client
@@ -11,14 +12,23 @@ const client = new vision.ImageAnnotatorClient({
 global.email = '';
 global.number = 1;
 
-fs.watch(__dirname + '/img', { encoding: 'buffer' }, (eventType, filename) => {
+//check folder update
+fs.watch(`${__dirname}${config.pathImg}${config.folder}`, { encoding: 'buffer' }, (eventType, filename) => {
   console.log(filename +'...');
   if (filename && global.number%2 == 1) {
       global.name = '';
       global.mobile = '';
       global.tel = '';
+      global.imagePath = `/${config.folder}/${filename}`;
+      // fs.readFile(`.${config.pathImg}${config.folder}/${filename}`, function (err, data) {
+      //   if (err) throw err;
+      //   global.imageBase64 = Buffer.from(data).toString('base64')
+      //   console.log(global.imageBase64);
+      // });
+
+      //detectText by using API
       client
-        .textDetection(__dirname + '/img/' + filename)
+        .textDetection(`${__dirname}${config.pathImg}${config.folder}/${filename}`)
         .then(results => {
           const detections = results[0].textAnnotations;
           console.log('==============================');
@@ -49,13 +59,15 @@ fs.watch(__dirname + '/img', { encoding: 'buffer' }, (eventType, filename) => {
   }
 })
 
+//open localhost
 express()
   .use(express.static(path.join(__dirname, 'public')))
   .set('views', path.join(__dirname, 'views'))
   .set('view engine', 'ejs')
   .get('/', (req, res) => {
+    // send REST API data
     var detectText = [
-        { textAll: global.textAll, email: global.email, tel: global.tel, mobile: global.mobile, name: global.name }
+        { textAll: global.textAll, email: global.email, tel: global.tel, mobile: global.mobile, name: global.name, imagePath: global.imagePath }
     ];
     res.render('pages/index', {
         detectText: detectText
