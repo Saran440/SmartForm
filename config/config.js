@@ -1,5 +1,6 @@
 var config = {
   pathImg: '/public/',
-  folder: 'img'
+  folderImg: 'img',
+  folderdb: 'database'
 }
 module.exports = config;

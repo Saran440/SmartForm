@@ -8,27 +8,41 @@ const vision = require('@google-cloud/vision');
 const client = new vision.ImageAnnotatorClient({
   keyFilename: 'R and D OCR-7b8c5a0be5e0.json'
 });
+var sqlite3 = require('sqlite3').verbose();
+var db = new sqlite3.Database(`.${config.pathImg}${config.folderdb}/data`);
 
 global.email = '';
 global.number = 1;
 
+db.serialize(function() {
+  db.run("CREATE TABLE IF NOT EXISTS lorem (pathImg TEXT, textAll TEXT, text_email TEXT, text_tel TEXT, text_mobile TEXT, text_name TEXT)");
+
+  // var stmt = db.prepare("INSERT INTO lorem VALUES (?)");
+  var stmt = db.prepare("INSERT INTO lorem VALUES (?,?,?,?,?,?)");
+
+  stmt.run("Ipsum","999");
+  stmt.finalize();
+
+  db.each("SELECT rowid AS id, pathImg FROM lorem WHERE id=1", function(err, row) {
+      console.log(row.id + ": " + row.pathImg + "|");
+  });
+});
+
+db.close();
+
+
 //check folder update
-fs.watch(`${__dirname}${config.pathImg}${config.folder}`, { encoding: 'buffer' }, (eventType, filename) => {
+fs.watch(`${__dirname}${config.pathImg}${config.folderImg}`, { encoding: 'buffer' }, (eventType, filename) => {
   console.log(filename +'...');
   if (filename && global.number%2 == 1) {
       global.name = '';
       global.mobile = '';
       global.tel = '';
-      global.imagePath = `/${config.folder}/${filename}`;
-      // fs.readFile(`.${config.pathImg}${config.folder}/${filename}`, function (err, data) {
-      //   if (err) throw err;
-      //   global.imageBase64 = Buffer.from(data).toString('base64')
-      //   console.log(global.imageBase64);
-      // });
+      global.imagePath = `/${config.folderImg}/${filename}`;
 
       //detectText by using API
       client
-        .textDetection(`${__dirname}${config.pathImg}${config.folder}/${filename}`)
+        .textDetection(`${__dirname}${config.pathImg}${config.folderImg}/${filename}`)
         .then(results => {
           const detections = results[0].textAnnotations;
           console.log('==============================');
@@ -81,7 +95,7 @@ function validateEmail(email) {
   var re = /(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))( |)@( |)((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/;
   if (email.match(re)) {
     global.email = email.match(re)[0];
-    console.log('Email : ' + global.email);
+    console.log(`Email : ${global.email}`);
   }
   // return re.test(email);
 }
@@ -100,7 +114,7 @@ function validateTel(tel) {
             global.tel = sentence.match(re)[0];
           }
           else{
-            global.tel = global.tel + ',' + sentence.match(re)[0];
+            global.tel = `${global.tel},${sentence.match(re)[0]}`
           }
         }
         // check Mobile number
@@ -109,7 +123,7 @@ function validateTel(tel) {
             global.mobile = sentence.match(re)[0];
           }
           else{
-            global.mobile = global.mobile + ',' + sentence.match(re)[0];
+            global.mobile = `${global.mobile},${sentence.match(re)[0]}`
           }
         }
       }
@@ -117,28 +131,33 @@ function validateTel(tel) {
     }
     i++;
   }
-  console.log('Tel : ' + global.tel);
-  console.log('Mobile : ' + global.mobile);
+  console.log(`Tel : ${global.tel}`);
+  console.log(`Mobile : ${global.mobile}`);
 }
 
 function validateName(name) {
   const n = name.length;
   var i = 0, sentence = '';
-  var re = /([a-zA-Z]{3,20} [a-zA-z]{3,20})/;
+  var re = /-( |)([a-zA-Z]{2,20} [a-zA-z]{2,20})(-|)/;
+
+  // check all character
   while (i <= n) {
     sentence = sentence + name[i];
+    // check if char is \n (= 1 word)
     if (name[i] == '\n') {
+      // check sentence that match regular expression
       if (sentence.match(re)) {
         if (global.name == '') {
-          global.name = sentence.match(re)[0];
+          global.name = sentence.match(re)[2];
         }
         else{
-          global.name = global.name + ',' + sentence.match(re)[0];
+          global.name = `${global.name},${sentence.match(re)[2]}`
         }
       }
       sentence = '';
     }
     i++;
   }
-  console.log('Name : ' + global.name);
+
+  console.log(`Name : ${global.name}`);
 }
