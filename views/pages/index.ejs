@@ -4,7 +4,7 @@
 <body>
   <div style="float: left;">
 
-    <form action="" method="post">
+    <form action="/" method="post">
       Email : <input type="text" value="<% detectText.forEach(function(data) { %> <%= data.email %> <% }); %> " >
       <br>
       Tel : <input type="text" value="<% detectText.forEach(function(data) { %> <%= data.tel %> <% }); %> " >
@@ -12,10 +12,16 @@
       Mobile : <input type="text" value="<% detectText.forEach(function(data) { %> <%= data.mobile %> <% }); %> " >
       <br>
       Name : <input type="text" value="<% detectText.forEach(function(data) { %> <%= data.name %> <% }); %> " >
+      <br>
+      Position : <input type="text" value="<% detectText.forEach(function(data) { %> <%= data.position %> <% }); %> " >
+      <br>
+      Url : <input type="text" value="<% detectText.forEach(function(data) { %> <%= data.url %> <% }); %> " >
+
+      <input type="submit" value="Submit">
      </form>
 
   </div>.
-  
+
   <div style="float: right;">
     <img src='<% detectText.forEach(function(data) { %>
                 <%= data.imagePath %>

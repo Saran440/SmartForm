@@ -1,4 +1,5 @@
 const express = require('express')
+var bodyParser = require('body-parser');
 const path = require('path')
 const PORT = process.env.PORT || 5000
 const config = require('./config/config')
@@ -12,33 +13,18 @@ var sqlite3 = require('sqlite3').verbose();
 var db = new sqlite3.Database(`.${config.pathImg}${config.folderdb}/data`);
 
 global.email = '';
-global.number = 1;
-
-db.serialize(function() {
-  db.run("CREATE TABLE IF NOT EXISTS lorem (pathImg TEXT, textAll TEXT, text_email TEXT, text_tel TEXT, text_mobile TEXT, text_name TEXT)");
-
-  // var stmt = db.prepare("INSERT INTO lorem VALUES (?)");
-  var stmt = db.prepare("INSERT INTO lorem VALUES (?,?,?,?,?,?)");
-
-  stmt.run("Ipsum","999");
-  stmt.finalize();
-
-  db.each("SELECT *, rowid AS id FROM lorem ORDER BY id DESC LIMIT 1", function(err, row) {
-      console.log(`${row.id} : ${row.pathImg} | ${row.textAll} | ${row.text_email}`);
-  });
-});
-
-db.close();
-
+global.test = 'www.ssd.com';
 
 //check folder update
 fs.watch(`${__dirname}${config.pathImg}${config.folderImg}`, { encoding: 'buffer' }, (eventType, filename) => {
-  console.log(filename +'...');
-  if (filename && global.number%2 == 1) {
+  console.log(filename +'...' + eventType);
+
+  if (filename && eventType == 'rename') {
       global.name = '';
       global.mobile = '';
       global.tel = '';
       global.url = '';
+      global.position = '';
       global.imagePath = `/${config.folderImg}/${filename}`;
 
       //detectText by using API
@@ -55,6 +41,7 @@ fs.watch(`${__dirname}${config.pathImg}${config.folderImg}`, { encoding: 'buffer
           validateTel(detections[0].description);
           validateName(detections[0].description);
           validateUrl(detections[0].description);
+          validatePosition(detections[0].description);
           if (global.email == '') {
             console.log('Email : ');
           }
@@ -63,15 +50,30 @@ fs.watch(`${__dirname}${config.pathImg}${config.folderImg}`, { encoding: 'buffer
           }
           console.log('==============================');
           global.textAll = detections[0].description;
+
+          db.serialize(function() {
+            db.run("CREATE TABLE IF NOT EXISTS sourceTable (pathImg TEXT, textAll TEXT, text_email TEXT, text_tel TEXT, text_mobile TEXT, text_name TEXT, text_position TEXT, text_url TEXT)");
+
+            // var stmt = db.prepare("INSERT INTO lorem VALUES (?)");
+            var stmt = db.prepare("INSERT INTO sourceTable VALUES (?,?,?,?,?,?,?,?)");
+
+            stmt.run(`${__dirname}${config.pathImg}${config.folderImg}/${filename}`, `${detections[0].description}`, `${global.email}`, `${global.tel}`, `${global.mobile}`, `${global.name}`,`${global.position}`,`${global.url}`);
+            stmt.finalize();
+
+            db.each("SELECT *, rowid AS id FROM sourceTable ORDER BY id DESC LIMIT 1", function(err, row) {
+                console.log(`${row.id} : ${row.pathImg} | ${row.text_email} | ${row.text_tel} | ${row.text_mobile} | ${row.text_name} | ${row.text_position} | ${row.text_url}`);
+            });
+          });
+
+          db.close();
+
           })
 
         .catch(err => {
           // console.error('ERROR:', err);
         });
-        global.number++;
-  }
-  else{
-    global.number++;
+
+
   }
 })
 
@@ -83,7 +85,7 @@ express()
   .get('/', (req, res) => {
     // send REST API data
     var detectText = [
-        { textAll: global.textAll, email: global.email, tel: global.tel, mobile: global.mobile, name: global.name, imagePath: global.imagePath }
+        { textAll: global.textAll, email: global.email, tel: global.tel, mobile: global.mobile, name: global.name, url: global.url, position: global.position, imagePath: global.imagePath }
     ];
     res.render('pages/index', {
         detectText: detectText
@@ -91,6 +93,10 @@ express()
 
   })
   .listen(PORT, () => console.log(`Listening on ${ PORT }`))
+
+express().post('/', bodyParser.json(), function(req, res) {
+      console.log('gooooooooood');
+  });
 
 
 function validateEmail(email) {
@@ -163,18 +169,17 @@ function validateName(name) {
 }
 
 function validateUrl(url) {
-  const n = name.length;
+  const n = url.length;
   var i = 0, sentence = '';
   var re = /www[.].+[.]\w+([.]\w+|)/;
 
   // check all character
   while (i <= n) {
-    sentence = sentence + name[i];
+    sentence = sentence + url[i];
     // check if char is \n (= 1 word)
-    if (name[i] == '\n') {
+    if (url[i] == '\n') {
       // check sentence that match regular expression
       if (sentence.match(re)) {
-        console.log('-------------url-----' + sentence.match(re)[0]);
         if (global.url == '') {
           global.url = sentence.match(re)[0];
         }
@@ -187,4 +192,30 @@ function validateUrl(url) {
     i++;
     }
   console.log(`URL : ${global.url}`);
+  }
+
+  function validatePosition(position) {
+    const n = position.length;
+    var i = 0, sentence = '';
+    var re = /[*]( |)(.+)[*]/;
+
+    // check all character
+    while (i <= n) {
+      sentence = sentence + position[i];
+      // check if char is \n (= 1 word)
+      if (position[i] == '\n') {
+        // check sentence that match regular expression
+        if (sentence.match(re)) {
+          if (global.position == '') {
+            global.position = sentence.match(re)[2];
+          }
+          else{
+            global.position = `${global.position},${sentence.match(re)[2]}`
+            }
+          }
+        sentence = '';
+        }
+      i++;
+      }
+    console.log(`Position : ${global.position}`);
   }
