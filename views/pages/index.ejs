@@ -3,32 +3,19 @@
 
 <body>
   <div style="float: left;">
+
     <form action="" method="post">
-      Email : <textarea cols="35">
-      <% detectText.forEach(function(data) { %>
-        <%= data.email %>
-      <% }); %>
-      </textarea><br>
-
-      Tel : <textarea cols="35">
-      <% detectText.forEach(function(data) { %>
-        <%= data.tel %>
-      <% }); %>
-      </textarea><br>
-
-      Mobile : <textarea cols="35">
-      <% detectText.forEach(function(data) { %>
-        <%= data.mobile %>
-      <% }); %>
-      </textarea><br>
-
-      Name : <textarea cols="70">
-      <% detectText.forEach(function(data) { %>
-        <%= data.name %>
-      <% }); %>
-      </textarea>
+      Email : <input type="text" value="<% detectText.forEach(function(data) { %> <%= data.email %> <% }); %> " >
+      <br>
+      Tel : <input type="text" value="<% detectText.forEach(function(data) { %> <%= data.tel %> <% }); %> " >
+      <br>
+      Mobile : <input type="text" value="<% detectText.forEach(function(data) { %> <%= data.mobile %> <% }); %> " >
+      <br>
+      Name : <input type="text" value="<% detectText.forEach(function(data) { %> <%= data.name %> <% }); %> " >
      </form>
+
   </div>.
+  
   <div style="float: right;">
     <img src='<% detectText.forEach(function(data) { %>
                 <%= data.imagePath %>

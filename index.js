@@ -23,8 +23,8 @@ db.serialize(function() {
   stmt.run("Ipsum","999");
   stmt.finalize();
 
-  db.each("SELECT rowid AS id, pathImg FROM lorem WHERE id=1", function(err, row) {
-      console.log(row.id + ": " + row.pathImg + "|");
+  db.each("SELECT *, rowid AS id FROM lorem ORDER BY id DESC LIMIT 1", function(err, row) {
+      console.log(`${row.id} : ${row.pathImg} | ${row.textAll} | ${row.text_email}`);
   });
 });
 
@@ -38,6 +38,7 @@ fs.watch(`${__dirname}${config.pathImg}${config.folderImg}`, { encoding: 'buffer
       global.name = '';
       global.mobile = '';
       global.tel = '';
+      global.url = '';
       global.imagePath = `/${config.folderImg}/${filename}`;
 
       //detectText by using API
@@ -53,6 +54,7 @@ fs.watch(`${__dirname}${config.pathImg}${config.folderImg}`, { encoding: 'buffer
           validateEmail(detections[0].description);
           validateTel(detections[0].description);
           validateName(detections[0].description);
+          validateUrl(detections[0].description);
           if (global.email == '') {
             console.log('Email : ');
           }
@@ -97,7 +99,6 @@ function validateEmail(email) {
     global.email = email.match(re)[0];
     console.log(`Email : ${global.email}`);
   }
-  // return re.test(email);
 }
 
 function validateTel(tel) {
@@ -158,6 +159,32 @@ function validateName(name) {
     }
     i++;
   }
-
   console.log(`Name : ${global.name}`);
 }
+
+function validateUrl(url) {
+  const n = name.length;
+  var i = 0, sentence = '';
+  var re = /www[.].+[.]\w+([.]\w+|)/;
+
+  // check all character
+  while (i <= n) {
+    sentence = sentence + name[i];
+    // check if char is \n (= 1 word)
+    if (name[i] == '\n') {
+      // check sentence that match regular expression
+      if (sentence.match(re)) {
+        console.log('-------------url-----' + sentence.match(re)[0]);
+        if (global.url == '') {
+          global.url = sentence.match(re)[0];
+        }
+        else{
+          global.url = `${global.url},${sentence.match(re)[0]}`
+          }
+        }
+      sentence = '';
+      }
+    i++;
+    }
+  console.log(`URL : ${global.url}`);
+  }
